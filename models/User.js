@@ -10,7 +10,11 @@ const userSchema = new mongoose.Schema(
     },
     tokens: [
       {
-        token: {
+        authToken: {
+          type: String,
+          required: true
+        },
+        googleToken: {
           type: String,
           required: true
         }
@@ -31,15 +35,19 @@ userSchema.methods.toJSON = function() {
   return userObject;
 };
 
-userSchema.methods.generateAuthToken = async function() {
+userSchema.methods.generateAuthToken = async function(googleToken) {
   const user = this;
 
-  const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
+  const authToken = jwt.sign(
+    { _id: user._id.toString() },
+    process.env.JWT_SECRET
+  );
 
-  user.tokens.push({ token });
+  user.tokens.push({ authToken, googleToken });
+
   await user.save();
 
-  return token;
+  return authToken;
 };
 
 const User = mongoose.model('User', userSchema);

@@ -1,6 +1,10 @@
 const express = require('express');
 
-const { getAuthorizeUrl, getUserProfile } = require('../services/googleOauth');
+const {
+  getAuthorizeUrl,
+  getUserProfileAndGoogleToken,
+  logout
+} = require('../services/googleOauth');
 const auth = require('../middlewares/auth');
 const User = require('../models/User');
 
@@ -11,26 +15,36 @@ router.get('/google', (req, res) => {
 });
 
 router.get('/google/callback', async (req, res) => {
-  const profile = await getUserProfile(req.query.code);
+  const { profile, googleToken } = await getUserProfileAndGoogleToken(
+    req.query.code
+  );
 
   // sign in
   let user = await User.findOne({ googleId: profile.id });
   if (user) {
-    const token = await user.generateAuthToken();
-    return res.send({ user, token });
+    const authToken = await user.generateAuthToken(googleToken);
+    return res.redirect(
+      `${process.env.APP_URL}/surveys/?authToken=${authToken}`
+    );
   }
 
   // sign up
   user = await new User({ googleId: profile.id }).save();
-  const token = await user.generateAuthToken();
-  res.send({ user, token });
+  const authToken = await user.generateAuthToken(googleToken);
+  return res.redirect(`${process.env.APP_URL}/surveys/?authToken=${authToken}`);
 });
 
 router.post('/logout', auth, async (req, res) => {
+  const { googleToken } = req.user.tokens.find(
+    token => token.authToken === req.authToken
+  );
+
   req.user.tokens = req.user.tokens.filter(token => {
-    return token.token !== req.token;
+    return token.authToken !== req.authToken;
   });
   await req.user.save();
+
+  logout(googleToken);
 
   res.send('Logged out successfully.');
 });

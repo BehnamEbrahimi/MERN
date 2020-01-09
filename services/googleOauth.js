@@ -14,7 +14,7 @@ const getAuthorizeUrl = () => {
   });
 };
 
-const getUserProfile = async code => {
+const getUserProfileAndGoogleToken = async code => {
   const {
     tokens: { access_token }
   } = await client.getToken(code);
@@ -23,7 +23,11 @@ const getUserProfile = async code => {
     `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${access_token}`
   );
 
-  return profile;
+  return { profile, googleToken: access_token };
 };
 
-module.exports = { getAuthorizeUrl, getUserProfile };
+const logout = async googleToken => {
+  await client.revokeToken(googleToken);
+};
+
+module.exports = { getAuthorizeUrl, getUserProfileAndGoogleToken, logout };
