@@ -1,10 +1,9 @@
 const express = require('express');
-
-const hiRouter = require('./routes/hi');
-
 const app = express();
 
-app.use(express.json());
-app.use('/', hiRouter);
+require('./startup/logging')();
+require('./startup/cors')(app);
+require('./startup/routes')(app);
+require('./startup/db')();
 
 module.exports = app;
