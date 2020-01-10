@@ -44,7 +44,11 @@ router.post('/logout', auth, async (req, res) => {
   });
   await req.user.save();
 
-  logout(googleToken);
+  try {
+    logout(googleToken);
+  } catch (ex) {
+    console.log(ex);
+  }
 
   res.send('Logged out successfully.');
 });

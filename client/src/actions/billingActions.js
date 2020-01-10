@@ -1,8 +1,8 @@
 import backend from '../apis/backend';
 import { FETCH_USER } from './types';
 
-export const handleToken = token => async dispatch => {
-  const { data } = await backend.post('/api/stripe', token);
+export const handleStripeToken = stripeToken => async dispatch => {
+  const { data: user } = await backend.post('/stripe', stripeToken);
 
-  dispatch({ type: FETCH_USER, payload: data });
+  dispatch({ type: FETCH_USER, payload: user });
 };

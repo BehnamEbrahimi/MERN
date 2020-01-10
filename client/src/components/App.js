@@ -13,7 +13,7 @@ const App = ({ fetchUser }) => {
     const authToken = window.location.search.replace('?authToken=', '');
     if (authToken) {
       localStorage.setItem('authToken', authToken);
-      window.location = '/';
+      window.location = '/surveys';
     }
 
     fetchUser();

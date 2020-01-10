@@ -19,7 +19,8 @@ const userSchema = new mongoose.Schema(
           required: true
         }
       }
-    ]
+    ],
+    credits: { type: Number, default: 0 }
   },
   {
     timestamps: true

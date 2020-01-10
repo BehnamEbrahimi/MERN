@@ -20,13 +20,11 @@ const Header = ({ auth, logout }) => {
       default:
         return (
           <>
-            <li key="1">
+            <li>
               <Payments />
             </li>
-            <li key="3" style={{ margin: '0 10px' }}>
-              Credits: {auth.credits}
-            </li>
-            <li key="2">
+            <li style={{ margin: '0 10px' }}>Credits: {auth.credits}</li>
+            <li>
               <Link to="/" onClick={logout}>
                 Logout
               </Link>

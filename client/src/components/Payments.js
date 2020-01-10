@@ -1,19 +1,19 @@
 import React from 'react';
 import StripeCheckout from 'react-stripe-checkout';
 import { connect } from 'react-redux';
-import { handleToken } from '../actions/billingActions';
+import { handleStripeToken } from '../actions/billingActions';
 
-const Payments = ({ handleToken }) => {
+const Payments = ({ handleStripeToken }) => {
   return (
     <StripeCheckout
-      name="Emaily"
-      description="$5 for 5 email credits"
-      amount={500}
-      token={token => handleToken(token)}
+      name="Survey Sender"
+      description="$50 for 50 email credits"
+      amount={5000}
+      token={stripeToken => handleStripeToken(stripeToken)}
       stripeKey={process.env.REACT_APP_STRIPE_KEY}>
       <button className="btn">Add Credits</button>
     </StripeCheckout>
   );
 };
 
-export default connect(null, { handleToken })(Payments);
+export default connect(null, { handleStripeToken })(Payments);
