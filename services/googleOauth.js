@@ -27,7 +27,11 @@ const getUserProfileAndGoogleToken = async code => {
 };
 
 const logout = async googleToken => {
-  await client.revokeToken(googleToken);
+  try {
+    await client.revokeToken(googleToken);
+  } catch (ex) {
+    console.log(ex);
+  }
 };
 
 module.exports = { getAuthorizeUrl, getUserProfileAndGoogleToken, logout };
