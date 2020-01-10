@@ -6,6 +6,6 @@ const error = require('../middlewares/error');
 module.exports = function(app) {
   app.use(express.json());
   app.use('/auth', authRouter);
-  app.use('/api/stripe', stripeRouter);
+  app.use('/stripe', stripeRouter);
   app.use(error);
 };
