@@ -19,5 +19,5 @@ const SurveyNew = () => {
 };
 
 export default reduxForm({
-  form: 'surveyForm'
+  form: 'surveyForm' // this is a TRICK to clear redux-form when the parent of the wizard form (this component) first appears but when the user goes forth and back inside the wizard, the values persist
 })(SurveyNew);

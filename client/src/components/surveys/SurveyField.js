@@ -2,7 +2,7 @@
 // label and text input
 import React from 'react';
 
-export default ({ input, label, meta: { error: errors, touched } }) => {
+export default ({ input, meta: { error: errors, touched }, label }) => {
   return (
     <div>
       <label>{label}</label>

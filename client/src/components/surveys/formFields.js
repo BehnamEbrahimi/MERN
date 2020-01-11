@@ -5,8 +5,6 @@ export default [
     label: 'Campaign Title',
     name: 'title',
     schema: ExtendedJoi.string()
-      .min(10)
-      .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
       .required()
       .label('Campaign Title')
   },
