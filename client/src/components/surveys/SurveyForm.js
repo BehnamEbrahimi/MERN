@@ -1,31 +1,25 @@
 // SurveyForm shows a form for a user to add input
 import React from 'react';
-import _ from 'lodash';
 import { reduxForm, Field } from 'redux-form';
 import { Link } from 'react-router-dom';
 import SurveyField from './SurveyField';
-import validateEmails from '../../utils/validateEmails';
+import validateAgainstSchema from '../../utils/Joi/validateAgainstSchema';
+import extractSchema from '../../utils/Joi/extractSchema';
 import formFields from './formFields';
 
 const SurveyForm = ({ handleSubmit, onSurveySubmit }) => {
-  const renderFields = () => {
-    return _.map(formFields, ({ label, name }) => {
-      return (
-        <Field
-          key={name}
-          component={SurveyField}
-          type="text"
-          label={label}
-          name={name}
-        />
-      );
-    });
-  };
-
   return (
     <div>
       <form onSubmit={handleSubmit(onSurveySubmit)}>
-        {renderFields()}
+        {formFields.map(({ label, name }) => (
+          <Field
+            key={name}
+            name={name}
+            label={label}
+            type="text"
+            component={SurveyField}
+          />
+        ))}
         <Link to="/surveys" className="red btn-flat white-text">
           Cancel
         </Link>
@@ -38,18 +32,10 @@ const SurveyForm = ({ handleSubmit, onSurveySubmit }) => {
   );
 };
 
-const validate = values => {
-  const errors = {};
+const validate = formData => {
+  const schema = extractSchema(formFields);
 
-  errors.recipients = validateEmails(values.recipients || '');
-
-  _.each(formFields, ({ name }) => {
-    if (!values[name]) {
-      errors[name] = 'You must provide a value.';
-    }
-  });
-
-  return errors;
+  return validateAgainstSchema(formData, schema);
 };
 
 export default reduxForm({
