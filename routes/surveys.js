@@ -1,6 +1,6 @@
 const express = require('express');
 const _ = require('lodash');
-const Path = require('path-parser');
+const { Path } = require('path-parser');
 const { URL } = require('url');
 
 const Survey = require('../models/Survey');
@@ -12,9 +12,9 @@ const surveyTemplate = require('../services/emailTemplates/surveyTemplate');
 const router = express.Router();
 
 router.get('/', auth, async (req, res) => {
-  const surveys = await Survey.find({ owner: req.user._id }).select({
-    recipients: false
-  });
+  const surveys = await Survey.find({ owner: req.user._id }).select(
+    '-recipients' // we dont want to send big blob of recipients
+  );
 
   res.send(surveys);
 });
@@ -51,28 +51,45 @@ router.get('/:surveyId/:choice', (req, res) => {
 });
 
 router.post('/webhooks', (req, res) => {
-  const p = new Path('/:surveyId/:choice');
+  // example req.body:
+  // [
+  //   {
+  //     email: 'behnam_e63@yahoo.com',
+  //     event: 'click',
+  //     ip: '115.70.55.156',
+  //     sg_event_id: 'Alg4-yVkToCDkNgeXmFnRQ',
+  //     sg_message_id: 'Dr_7evwJQPGDxWnEjrPPOA.filter0132p1iad2-30461-5E19A785-1F.0',
+  //     timestamp: 1578744563,
+  //     url: 'http://localhost:3000/api/surveys/5e19a782607b910ed41c3235/yes',
+  //     url_offset: { index: 0, type: 'html' },
+  //     useragent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'
+  //   }
+  // ]
+  const p = new Path('/api/surveys/:surveyId/:choice');
 
   _.chain(req.body)
     .map(({ email, url }) => {
-      const match = p.test(new URL(url).pathname);
+      // console.log(new URL(url).pathname); // /api/surveys/5e19a782607b910ed41c3235/yes
+      const match = p.test(new URL(url).pathname); // e.g { surveyId: '5e19a782607b910ed41c3235', choice: 'no' }
       if (match) {
         return { email, surveyId: match.surveyId, choice: match.choice };
       }
     })
-    .compact()
-    .uniqBy('email', 'surveyId')
+    .compact() // removes undefined values from the array
+    .uniqBy('email', 'surveyId') // removes one of the objects with the same 'email' and 'surveyId'
     .each(({ surveyId, email, choice }) => {
       Survey.updateOne(
+        // ATTENTION: survey document is very big (because of all its subdocs) so never try to fetch one document and then update it!
         {
           _id: surveyId,
           recipients: {
+            // because recipients is an array, $elemMatch is used to go through all its elements and find this match. so the whole query is find a survey which has a recipient with that condition
             $elemMatch: { email: email, responded: false }
           }
         },
         {
-          $inc: { [choice]: 1 },
-          $set: { 'recipients.$.responded': true },
+          $inc: { [choice]: 1 }, // ES6 key interpolation
+          $set: { 'recipients.$.responded': true }, // $ is lined up with the $elemMatch. the positional $ operator variable, which holds the "matched" position in the array
           lastResponded: new Date()
         }
       ).exec();

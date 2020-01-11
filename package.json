@@ -7,8 +7,9 @@
     "start": "node index.js",
     "server": "env-cmd -f ./config/_dev.env nodemon index.js",
     "client": "npm run start --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run tunnel\"",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client",
+    "tunnel": "ngrok http 5000"
   },
   "repository": {
     "type": "git",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "concurrently": "^5.0.2",
     "env-cmd": "^10.0.1",
+    "ngrok": "^3.2.7",
     "nodemon": "^2.0.2"
   }
 }
